@@ -12,25 +12,31 @@ import {
   AlertController,
   IonButton,
   IonButtons,
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
+  IonCardTitle,
+  IonCol,
   IonContent,
+  IonGrid,
   IonHeader,
   IonInput,
   IonItem,
   IonList,
+  IonRow,
   IonSpinner,
   IonTitle,
   IonToolbar
 } from '@ionic/angular';
 import jsPDF from 'jspdf';
 
-// Validador personalizado: La fecha no puede ser posterior al día de hoy
 function fechaNoFuturaValidator(control: AbstractControl): ValidationErrors | null {
   if (!control.value) {
     return null;
   }
   const fechaSeleccionada = new Date(control.value);
   const hoy = new Date();
-  hoy.setHours(23, 59, 59, 999); // Final del día actual
+  hoy.setHours(23, 59, 59, 999);
 
   if (fechaSeleccionada > hoy) {
     return { fechaFutura: true };
@@ -38,10 +44,18 @@ function fechaNoFuturaValidator(control: AbstractControl): ValidationErrors | nu
   return null;
 }
 
+// Función auxiliar para cifrar mediante hash SHA-256
+async function sha256(texto: string): Promise<string> {
+  const msgBuffer = new TextEncoder().encode(texto);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 @Component({
-  selector: 'app-home',
-  templateUrl: 'home.page.html',
-  styleUrls: ['home.page.scss'],
+  selector: 'app-registro',
+  templateUrl: './registro.page.html',
+  styleUrls: ['./registro.page.scss'],
   standalone: true,
   imports: [
     CommonModule,
@@ -51,6 +65,13 @@ function fechaNoFuturaValidator(control: AbstractControl): ValidationErrors | nu
     IonTitle,
     IonButtons,
     IonContent,
+    IonGrid,
+    IonRow,
+    IonCol,
+    IonCard,
+    IonCardHeader,
+    IonCardTitle,
+    IonCardContent,
     IonList,
     IonItem,
     IonInput,
@@ -58,14 +79,12 @@ function fechaNoFuturaValidator(control: AbstractControl): ValidationErrors | nu
     IonSpinner
   ]
 })
-export class HomePage {
+export class RegistroPage {
   public registroForm: FormGroup;
   public isSubmitting = signal<boolean>(false);
   public darkMode = signal<boolean>(false);
-  // Almacena los últimos datos registrados para poder generar el PDF
   public datosEnviados = signal<any>(null);
 
-  // Fecha máxima permitida para el input en formato YYYY-MM-DD
   public maxFechaHoy: string = new Date().toISOString().split('T')[0];
 
   constructor(
@@ -82,7 +101,6 @@ export class HomePage {
           Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/)
         ]
       ],
-      // Requisito 4 y 6: Campo fecha de nacimiento obligatoria y no superior a hoy
       fechaNacimiento: ['', [Validators.required, fechaNoFuturaValidator]]
     });
   }
@@ -91,17 +109,13 @@ export class HomePage {
     return this.registroForm.controls;
   }
 
-  // Requisito 7: Alternar entre modo claro y oscuro
   public toggleDarkMode(): void {
     const nuevoEstado = !this.darkMode();
     this.darkMode.set(nuevoEstado);
-
-    // Conmuta las clases estándar de Ionic para modo oscuro
     document.documentElement.classList.toggle('ion-palette-dark', nuevoEstado);
     document.body.classList.toggle('dark', nuevoEstado);
   }
 
-  // Requisito 5: Enviar formulario y mostrar Alert de Ionic
   public async onSubmit(): Promise<void> {
     if (this.registroForm.invalid) {
       this.registroForm.markAllAsTouched();
@@ -111,20 +125,27 @@ export class HomePage {
     this.isSubmitting.set(true);
 
     try {
-      const formData = this.registroForm.value;
-      console.log('Datos enviados:', formData);
+      const formRaw = this.registroForm.value;
 
-      // Simulación de petición de guardado
+      // Cifrado de contraseña con SHA-256 (Punto 10)
+      const contrasenaCifrada = await sha256(formRaw.password);
+
+      const payloadSeguro = {
+        ...formRaw,
+        password: contrasenaCifrada // Se reemplaza el texto plano por el hash
+      };
+
+      // Se imprime en consola sin exponer la clave en plano
+      console.log('Payload seguro a enviar:', payloadSeguro);
+
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      // Guardamos una copia para habilitar la descarga del PDF
-      this.datosEnviados.set({ ...formData });
+      this.datosEnviados.set({ ...payloadSeguro });
 
-      // Alert nativo de Ionic notificando el éxito
       const alert = await this.alertController.create({
         header: '¡Registro Exitoso!',
         subHeader: 'Formulario enviado correctamente',
-        message: `Bienvenido/a, ${formData.nombre}. Tus datos han sido procesados. Ya puedes descargar tu resguardo en PDF.`,
+        message: `Bienvenido/a, ${formRaw.nombre}. Tu registro se ha procesado con contraseña protegida.`,
         buttons: ['Aceptar']
       });
 
@@ -137,23 +158,18 @@ export class HomePage {
     }
   }
 
-  // Requisito 8: Descargar PDF con los datos del usuario registrado
   public descargarPDF(): void {
     const datos = this.datosEnviados();
-    if (!datos) {
-      return;
-    }
+    if (!datos) return;
 
     const doc = new jsPDF();
 
-    // Encabezado
     doc.setFillColor(56, 128, 255);
     doc.rect(0, 0, 210, 30, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(18);
     doc.text('Resguardo de Registro de Usuario', 15, 20);
 
-    // Cuerpo con datos
     doc.setTextColor(40, 40, 40);
     doc.setFontSize(12);
 
@@ -164,14 +180,14 @@ export class HomePage {
     y += 12;
     doc.text(`Fecha de nacimiento: ${datos.fechaNacimiento}`, 20, y);
     y += 12;
+    doc.text(`Hash contraseña (SHA-256): ${datos.password.substring(0, 20)}...`, 20, y);
+    y += 12;
     doc.text(`Fecha de expedición: ${new Date().toLocaleString()}`, 20, y);
 
-    // Pie de página
     doc.setFontSize(10);
     doc.setTextColor(120, 120, 120);
-    doc.text('Documento generado automáticamente por la aplicación de Formularios Reactivos.', 20, 120);
+    doc.text('Documento generado automáticamente por la aplicación de Formularios Reactivos.', 20, 130);
 
-    // Guardar archivo
     doc.save(`registro_${datos.nombre.replace(/\s+/g, '_')}.pdf`);
   }
 }
