@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import {
   AbstractControl,
   FormBuilder,
@@ -29,6 +30,7 @@ import {
   IonToolbar
 } from '@ionic/angular';
 import jsPDF from 'jspdf';
+
 
 function fechaNoFuturaValidator(control: AbstractControl): ValidationErrors | null {
   if (!control.value) {
@@ -60,6 +62,7 @@ async function sha256(texto: string): Promise<string> {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    RouterLink,
     IonHeader,
     IonToolbar,
     IonTitle,

@@ -1,7 +1,14 @@
 <ion-header [translucent]="true">
   <ion-toolbar color="primary">
     <ion-title>Registro de Usuario</ion-title>
+
     <ion-buttons slot="end">
+      <!-- Botón para navegar y comparar con el formulario Template-Driven -->
+      <ion-button routerLink="/driven" fill="outline">
+        Ver Driven 🔄
+      </ion-button>
+
+      <!-- Botón para alternar modo claro / oscuro -->
       <ion-button (click)="toggleDarkMode()">
         {{ darkMode() ? '☀️ Claro' : '🌙 Oscuro' }}
       </ion-button>
@@ -10,19 +17,19 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <!-- Contenedor adaptativo RWD para móviles, tablets y escritorios -->
+  <!-- Grid adaptativo para Responsive Web Design (RWD) en móviles, tablets y PCs -->
   <ion-grid fixed>
     <ion-row class="ion-justify-content-center">
       <ion-col size="12" size-md="8" size-lg="6">
         <ion-card class="ion-no-margin">
           <ion-card-header>
-            <ion-card-title class="ion-text-center">Crear Cuenta</ion-card-title>
+            <ion-card-title class="ion-text-center">Crear Cuenta (Reactivo)</ion-card-title>
           </ion-card-header>
 
           <ion-card-content>
             <form [formGroup]="registroForm" (ngSubmit)="onSubmit()">
               <ion-list lines="full">
-                <!-- Campo Nombre -->
+                <!-- 1. Campo Nombre Completo -->
                 <ion-item>
                   <ion-input
                     label="Nombre completo"
@@ -34,7 +41,7 @@
                   </ion-input>
                 </ion-item>
 
-                <!-- Campo Email -->
+                <!-- 2. Campo Correo Electrónico con teclado optimizado para móviles -->
                 <ion-item>
                   <ion-input
                     label="Correo Electrónico"
@@ -42,24 +49,24 @@
                     type="email"
                     inputmode="email"
                     formControlName="email"
-                    errorText="Introduzca un email válido."
+                    errorText="Introduzca un correo electrónico válido."
                   >
                   </ion-input>
                 </ion-item>
 
-                <!-- Campo Contraseña -->
+                <!-- 3. Campo Contraseña -->
                 <ion-item>
                   <ion-input
                     label="Contraseña"
                     labelPlacement="floating"
                     type="password"
                     formControlName="password"
-                    errorText="Mínimo 8 caracteres, letras y números."
+                    errorText="Mínimo 8 caracteres, al menos una letra y un número."
                   >
                   </ion-input>
                 </ion-item>
 
-                <!-- Campo Fecha de Nacimiento -->
+                <!-- 4. Campo Fecha de Nacimiento (con límite máximo en el día actual) -->
                 <ion-item>
                   <ion-input
                     label="Fecha de Nacimiento"
@@ -67,12 +74,13 @@
                     type="date"
                     formControlName="fechaNacimiento"
                     [max]="maxFechaHoy"
-                    errorText="La fecha es obligatoria y no puede ser futura."
+                    errorText="La fecha es obligatoria y no puede ser posterior a hoy."
                   >
                   </ion-input>
                 </ion-item>
               </ion-list>
 
+              <!-- Botón de Envío con gestión de estado mediante Signal -->
               <div class="ion-padding-top">
                 <ion-button
                   expand="block"
@@ -85,10 +93,10 @@
               </div>
             </form>
 
-            <!-- Botón Descargar PDF tras registro -->
+            <!-- Botón de Descarga de PDF (disponible tras enviar el formulario) -->
             <div *ngIf="datosEnviados()" class="ion-padding-top">
               <ion-button expand="block" color="success" (click)="descargarPDF()">
-                📥 Descargar Datos en PDF
+                📥 Descargar Resguardo en PDF
               </ion-button>
             </div>
           </ion-card-content>

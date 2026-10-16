@@ -1,0 +1,133 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="secondary">
+    <ion-title>Template-Driven Form</ion-title>
+    <ion-buttons slot="end">
+      <!-- Botón para volver a la página Reactiva -->
+      <ion-button routerLink="/registro" fill="outline">
+        Ver Reactivo 🔄
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-grid fixed>
+    <ion-row class="ion-justify-content-center">
+      <ion-col size="12" size-md="8" size-lg="6">
+        <ion-card class="ion-no-margin">
+          <ion-card-header>
+            <ion-card-title class="ion-text-center">Formulario Template-Driven</ion-card-title>
+          </ion-card-header>
+
+          <ion-card-content>
+            <!-- Formulario enlazado con la directiva ngForm -->
+            <form #drivenForm="ngForm" (ngSubmit)="onSubmit(drivenForm)">
+              <ion-list lines="full">
+                <!-- Nombre con validación minlength y required en el HTML -->
+                <ion-item>
+                  <ion-input
+                    label="Nombre completo"
+                    labelPlacement="floating"
+                    type="text"
+                    name="nombre"
+                    [(ngModel)]="usuario.nombre"
+                    #nombreCtrl="ngModel"
+                    required
+                    minlength="3"
+                  >
+                  </ion-input>
+                </ion-item>
+                <ion-note
+                  color="danger"
+                  class="ion-padding-start"
+                  *ngIf="nombreCtrl.invalid && (nombreCtrl.dirty || nombreCtrl.touched)"
+                >
+                  El nombre es obligatorio (mín. 3 caracteres).
+                </ion-note>
+
+                <!-- Email con validación de tipo email en HTML -->
+                <ion-item>
+                  <ion-input
+                    label="Correo Electrónico"
+                    labelPlacement="floating"
+                    type="email"
+                    inputmode="email"
+                    name="email"
+                    [(ngModel)]="usuario.email"
+                    #emailCtrl="ngModel"
+                    required
+                    email
+                  >
+                  </ion-input>
+                </ion-item>
+                <ion-note
+                  color="danger"
+                  class="ion-padding-start"
+                  *ngIf="emailCtrl.invalid && (emailCtrl.dirty || emailCtrl.touched)"
+                >
+                  Introduzca un correo electrónico válido.
+                </ion-note>
+
+                <!-- Contraseña con patrón RegExp en HTML -->
+                <ion-item>
+                  <ion-input
+                    label="Contraseña"
+                    labelPlacement="floating"
+                    type="password"
+                    name="password"
+                    [(ngModel)]="usuario.password"
+                    #passCtrl="ngModel"
+                    required
+                    pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$"
+                  >
+                  </ion-input>
+                </ion-item>
+                <ion-note
+                  color="danger"
+                  class="ion-padding-start"
+                  *ngIf="passCtrl.invalid && (passCtrl.dirty || passCtrl.touched)"
+                >
+                  Mínimo 8 caracteres, al menos una letra y un número.
+                </ion-note>
+
+                <!-- Fecha de Nacimiento no superior a hoy con [max] -->
+                <ion-item>
+                  <ion-input
+                    label="Fecha de Nacimiento"
+                    labelPlacement="floating"
+                    type="date"
+                    name="fechaNacimiento"
+                    [(ngModel)]="usuario.fechaNacimiento"
+                    #fechaCtrl="ngModel"
+                    [max]="maxFechaHoy"
+                    required
+                  >
+                  </ion-input>
+                </ion-item>
+                <ion-note
+                  color="danger"
+                  class="ion-padding-start"
+                  *ngIf="fechaCtrl.invalid && (fechaCtrl.dirty || fechaCtrl.touched)"
+                >
+                  La fecha es obligatoria y no puede ser superior a hoy.
+                </ion-note>
+              </ion-list>
+
+              <div class="ion-padding-top">
+                <ion-button
+                  expand="block"
+                  color="secondary"
+                  type="submit"
+                  [disabled]="drivenForm.invalid || isSubmitting() || usuario.fechaNacimiento > maxFechaHoy"
+                >
+                  <span *ngIf="!isSubmitting()">Guardar (Template-Driven)</span>
+                  <ion-spinner name="crescent" *ngIf="isSubmitting()"></ion-spinner>
+                </ion-button>
+              </div>
+            </form>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

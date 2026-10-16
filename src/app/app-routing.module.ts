@@ -7,6 +7,10 @@ const routes: Routes = [
     loadChildren: () => import('./registro/registro.module').then(m => m.RegistroPageModule)
   },
   {
+    path: 'driven',
+    loadChildren: () => import('./driven/driven.module').then(m => m.DrivenPageModule)
+  },
+  {
     path: '',
     redirectTo: 'registro',
     pathMatch: 'full'
