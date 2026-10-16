@@ -1,6 +1,12 @@
 <ion-header [translucent]="true">
   <ion-toolbar color="primary">
     <ion-title>Registro de Usuario</ion-title>
+    <!-- Requisito 7: Botón para conmutar modo oscuro -->
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleDarkMode()">
+        {{ darkMode() ? '☀️ Claro' : '🌙 Oscuro' }}
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -43,8 +49,22 @@
         >
         </ion-input>
       </ion-item>
+
+      <!-- Requisitos 4 y 6: Campo Fecha de Nacimiento -->
+      <ion-item>
+        <ion-input
+          label="Fecha de Nacimiento"
+          labelPlacement="floating"
+          type="date"
+          formControlName="fechaNacimiento"
+          [max]="maxFechaHoy"
+          errorText="La fecha es obligatoria y no puede ser posterior a hoy."
+        >
+        </ion-input>
+      </ion-item>
     </ion-list>
 
+    <!-- Botón de Enviar Formulario -->
     <div class="ion-padding-top">
       <ion-button
         expand="block"
@@ -56,4 +76,11 @@
       </ion-button>
     </div>
   </form>
+
+  <!-- Requisito 8: Botón de Descarga de PDF tras registrarse -->
+  <div *ngIf="datosEnviados()" class="ion-padding-top">
+    <ion-button expand="block" color="success" (click)="descargarPDF()">
+      📥 Descargar Datos en PDF
+    </ion-button>
+  </div>
 </ion-content>
